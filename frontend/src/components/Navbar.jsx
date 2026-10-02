@@ -51,7 +51,7 @@ export default function Navbar({ role = 'student', activeTab = 'feed', onTabChan
     <nav className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-y-3 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
       {/* Left: Logo & Student Tabs */}
       <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-3 md:w-auto md:flex-nowrap">
-        <Link to="/" className="flex items-center cursor-pointer transition hover:opacity-95">
+        <Link to="/" className="flex shrink-0 items-center cursor-pointer transition hover:opacity-95">
           <Logo />
         </Link>
         
