@@ -1,6 +1,7 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 
 // ── Route imports ────────────────────────────
@@ -17,7 +18,6 @@ const app = express();
 // ── Global Middleware ────────────────────────
 app.use(
   cors({
-    // Allow Vite dev server (default port 5173) and any localhost port
     origin: [
       'http://localhost:5173',
       'http://localhost:3000',
@@ -27,8 +27,9 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ── Health Check ─────────────────────────────
 app.get('/', (req, res) => {
@@ -56,8 +57,6 @@ app.use((req, res) => {
 });
 
 // ── Global Error Handler ─────────────────────
-// Catches any unhandled errors thrown from route handlers
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.stack);
   res.status(err.status || 500).json({

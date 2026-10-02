@@ -1,22 +1,20 @@
-const jwt = require('jsonwebtoken');
+﻿const jwt = require('jsonwebtoken');
 
-/**
- * verifyToken — Protects routes that require a logged-in user.
- * Expects: Authorization: Bearer <token>
- * On success: attaches decoded payload { id, role } to req.user
- */
 const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  // Check cookie first, then Authorization header
+  let token = req.cookies?.token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
     return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
 
-  const token = authHeader.split(' ')[1];
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, role, iat, exp }
+    req.user = decoded;
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
@@ -26,12 +24,8 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-/**
- * isAdmin — Must be used AFTER verifyToken.
- * Blocks non-admin users with 403 Forbidden.
- */
 const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (req.user?.role !== 'admin') {
     return res.status(403).json({ message: 'Access forbidden. Admin role required.' });
   }
   next();

@@ -2,9 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-/**
- * Helper — signs a JWT token for a given user
- */
 const signToken = (user) => {
   return jwt.sign(
     { id: user._id, role: user.role },
@@ -13,51 +10,56 @@ const signToken = (user) => {
   );
 };
 
-// ─────────────────────────────────────────────
+const sendTokenResponse = (res, statusCode, user, message) => {
+  const token = signToken(user);
+
+  // Set HTTP-only Cookie
+  const cookieOptions = {
+    httpOnly: true,
+    secure: false, // set to true in production HTTPS
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+  res.cookie('token', token, cookieOptions);
+
+  res.status(statusCode).json({
+    message,
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      studentId: user.studentId,
+      department: user.department,
+    },
+  });
+};
+
 // @route   POST /api/auth/signup
-// @desc    Register a new user
-// @access  Public
-// ─────────────────────────────────────────────
 const signup = async (req, res) => {
   try {
     const { name, email, password, role, studentId, department } = req.body;
 
-    // Check if email is already registered
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user — only allow 'student' via public signup (admin must be set in DB)
     const newUser = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role === 'admin' ? 'student' : (role || 'student'), // Prevent admin self-registration
+      role: role === 'admin' ? 'student' : (role || 'student'),
       studentId,
       department,
     });
 
-    const token = signToken(newUser);
-
-    res.status(201).json({
-      message: 'Account created successfully.',
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        studentId: newUser.studentId,
-        department: newUser.department,
-      },
-    });
+    sendTokenResponse(res, 201, newUser, 'Account created successfully.');
   } catch (error) {
-    // Mongoose duplicate key error (race condition safety)
     if (error.code === 11000) {
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
@@ -66,56 +68,31 @@ const signup = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────
 // @route   POST /api/auth/login
-// @desc    Authenticate user and return JWT
-// @access  Public
-// ─────────────────────────────────────────────
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      // Generic message to prevent user enumeration
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    const token = signToken(user);
-
-    res.status(200).json({
-      message: 'Login successful.',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        studentId: user.studentId,
-        department: user.department,
-      },
-    });
+    sendTokenResponse(res, 200, user, 'Login successful.');
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error. Please try again.' });
   }
 };
 
-// ─────────────────────────────────────────────
 // @route   GET /api/auth/me
-// @desc    Get currently logged-in user's profile
-// @access  Private (verifyToken)
-// ─────────────────────────────────────────────
 const getMe = async (req, res) => {
   try {
-    // req.user.id is set by verifyToken middleware
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
@@ -127,4 +104,10 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, getMe };
+// @route   POST /api/auth/logout
+const logout = (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'Logged out successfully.' });
+};
+
+module.exports = { signup, login, getMe, logout };

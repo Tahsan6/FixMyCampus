@@ -1,17 +1,16 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 
-const { signup, login, getMe } = require('../controllers/authController');
+const { signup, login, getMe, logout } = require('../controllers/authController');
 const { verifyToken } = require('../middleware/auth');
 const { validateSignup, validateLogin } = require('../middleware/validate');
 
-// POST /api/auth/signup
+// Public
 router.post('/signup', validateSignup, signup);
-
-// POST /api/auth/login
 router.post('/login', validateLogin, login);
+router.post('/logout', logout);
 
-// GET /api/auth/me  — returns current logged-in user's profile
+// Protected
 router.get('/me', verifyToken, getMe);
 
 module.exports = router;
