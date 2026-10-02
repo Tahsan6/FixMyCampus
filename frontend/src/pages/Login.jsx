@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogIn, GraduationCap, Users, Lock, Mail, Eye, ShieldCheck, ArrowRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 export default function Login() {
   const [role, setRole] = useState('student');
@@ -26,16 +27,10 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fa] p-4 font-sans text-slate-800">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center bg-indigo-900 text-white w-12 h-12 rounded-xl mb-4 shadow-lg">
-          <span className="font-bold text-xl">.</span>
-        </div>
-        <div className="mb-2">
-          <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
-            Campus Operations Network
-          </span>
-        </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">FixMyCampus</h1>
-        <p className="text-sm text-slate-500 max-w-xs mx-auto">
+        <Link to="/" className="inline-flex justify-center mb-3 transition hover:opacity-95">
+          <Logo size="lg" />
+        </Link>
+        <p className="text-xs text-slate-500 max-w-xs mx-auto">
           Sign in to report campus maintenance issues or manage facilities dispatch
         </p>
       </div>

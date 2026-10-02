@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserPlus, GraduationCap, Users, Lock, Mail, Building, Hash, User, ArrowRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 export default function Signup() {
   const [role, setRole] = useState('student');
@@ -26,8 +27,10 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fa] p-4 font-sans text-slate-800">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">FixMyCampus</h1>
-        <p className="text-sm text-slate-500 max-w-xs mx-auto">Create a new account</p>
+        <Link to="/" className="inline-flex justify-center mb-2 transition hover:opacity-95">
+          <Logo size="lg" />
+        </Link>
+        <p className="text-xs text-slate-500 max-w-xs mx-auto">Create a new account</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border-t-4 border-indigo-700 p-6">

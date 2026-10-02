@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import StudentDashboard from './pages/StudentDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -11,7 +12,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/admin" element={<div className="p-4 bg-white shadow rounded m-8">Admin Dashboard (Coming Soon)</div>} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );

@@ -114,6 +114,14 @@ export default function StudentDashboard() {
   const [newLocation, setNewLocation] = useState('');
   const [newDescription, setNewDescription] = useState('');
 
+  // Duplicate detection (Bonus requirement from problem statement)
+  const potentialDuplicate = !editingIssueId && newTitle.trim().length >= 4
+    ? issues.find(i => 
+        i.title.toLowerCase().includes(newTitle.trim().toLowerCase()) ||
+        newTitle.trim().toLowerCase().split(' ').filter(w => w.length > 3).some(w => i.title.toLowerCase().includes(w))
+      )
+    : null;
+
   const resetReportForm = () => {
     setNewTitle('');
     setNewCategory('Electrical');
@@ -695,6 +703,14 @@ export default function StudentDashboard() {
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Issue Title</label>
                 <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="e.g. Broken fan in CSE Lab 3" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-600" required />
+                {potentialDuplicate && (
+                  <div className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                    <span>
+                      <strong>Similar report exists:</strong> "#{potentialDuplicate.id}: {potentialDuplicate.title}". You can upvote it instead!
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
